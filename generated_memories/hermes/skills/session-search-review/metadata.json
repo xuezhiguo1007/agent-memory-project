@@ -1,0 +1,12 @@
+{
+  "skill_name": "Session Search Review",
+  "description": "先检索 session，再提炼摘要，再决定是否写入 persistent memory。",
+  "triggers": [],
+  "steps": [],
+  "examples": [],
+  "content": "# Session Search Review\n\n先检索 session，再提炼摘要，再决定是否写入 persistent memory。\n",
+  "metadata": {
+    "source_session_id": "demo-1"
+  },
+  "score": null
+}

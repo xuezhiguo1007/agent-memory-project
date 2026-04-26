@@ -2,12 +2,16 @@
   "memory_id": "memory_11ac52a420f8",
   "content": "用户偏好：喜欢海岛旅行，不喜欢太赶的行程",
   "source": "cli",
+  "layer": "semantic",
   "tags": [
     "travel",
     "relaxed"
   ],
-  "metadata": {},
+  "metadata": {
+    "promoted_at": "2026-04-26T13:13:52.918852+00:00",
+    "promoted_to": "semantic"
+  },
   "created_at": "2026-04-26T03:31:53.704048+00:00",
-  "updated_at": "2026-04-26T03:31:53.704048+00:00",
+  "updated_at": "2026-04-26T13:13:52.918852+00:00",
   "score": null
 }

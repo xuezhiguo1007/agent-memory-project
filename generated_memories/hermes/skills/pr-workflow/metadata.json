@@ -1,0 +1,18 @@
+{
+  "skill_name": "PR Workflow",
+  "description": "Create and review pull requests with a repeatable checklist.",
+  "triggers": [
+    "pr",
+    "review",
+    "merge"
+  ],
+  "steps": [
+    "inspect diff",
+    "run tests",
+    "write summary"
+  ],
+  "examples": [],
+  "content": "# PR Workflow\n\nCreate and review pull requests with a repeatable checklist.\n\n## Triggers\n- pr\n- review\n- merge\n\n## Steps\n1. inspect diff\n2. run tests\n3. write summary\n",
+  "metadata": {},
+  "score": null
+}
