@@ -1,0 +1,9 @@
+[app]
+api_title = "Agent Memory Project"
+api_version = "0.1.0"
+api_description = "A FastAPI wrapper for validating local memory storage and recall."
+
+[llm]
+default_model = "gpt-4.1-mini"
+openai_api_key = ""
+openai_base_url = ""

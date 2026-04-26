@@ -1,0 +1,11 @@
+[project]
+name = "agent-memory-project"
+version = "0.1.0"
+description = "Minimal agent memory verification project"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.116.0",
+    "langchain-openai>=0.3.0",
+    "uvicorn>=0.35.0",
+]
