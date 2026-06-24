@@ -1,0 +1,23 @@
+{
+  "max_messages_per_session": 100,
+  "max_tokens_per_snapshot": 4000,
+  "entity_extraction_enabled": true,
+  "auto_compression_enabled": true,
+  "compression_threshold": 50,
+  "supported_entity_types": [
+    "person",
+    "project",
+    "concept",
+    "tool",
+    "file",
+    "api",
+    "task"
+  ],
+  "pg_connection": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "langmem_db",
+    "user": "langmem_user",
+    "password": "langmem_password"
+  }
+}

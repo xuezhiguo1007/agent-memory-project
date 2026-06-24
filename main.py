@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 
+from agent_memory_project.services.langmem_service import LangmemService
 from agent_memory_project.services.persistent_memory_service import (
     PersistentMemoryService,
 )
@@ -128,6 +130,66 @@ def parse_args() -> argparse.Namespace:
     materialize_parser.add_argument("--title", required=True)
     materialize_parser.add_argument("--content", required=True)
 
+    # Langmem CLI commands
+    langmem_msg_add_parser = subparsers.add_parser(
+        "langmem-msg-add", help="Add a message to langmem session."
+    )
+    langmem_msg_add_parser.add_argument("--session-id", required=True)
+    langmem_msg_add_parser.add_argument("--role", default="user")
+    langmem_msg_add_parser.add_argument("--content", required=True)
+    langmem_msg_add_parser.add_argument("--metadata", default="{}")
+
+    langmem_msg_list_parser = subparsers.add_parser(
+        "langmem-msg-list", help="List messages in a langmem session."
+    )
+    langmem_msg_list_parser.add_argument("--session-id", required=True)
+    langmem_msg_list_parser.add_argument("--limit", type=int, default=50)
+
+    langmem_msg_search_parser = subparsers.add_parser(
+        "langmem-msg-search", help="Search messages in a langmem session."
+    )
+    langmem_msg_search_parser.add_argument("--session-id", required=True)
+    langmem_msg_search_parser.add_argument("--query", required=True)
+    langmem_msg_search_parser.add_argument("--limit", type=int, default=10)
+
+    langmem_entity_add_parser = subparsers.add_parser(
+        "langmem-entity-add", help="Add an entity to langmem."
+    )
+    langmem_entity_add_parser.add_argument("--entity-name", required=True)
+    langmem_entity_add_parser.add_argument("--entity-type", required=True)
+    langmem_entity_add_parser.add_argument("--description", required=True)
+    langmem_entity_add_parser.add_argument("--metadata", default="{}")
+
+    langmem_entity_list_parser = subparsers.add_parser(
+        "langmem-entity-list", help="List langmem entities."
+    )
+    langmem_entity_list_parser.add_argument("--entity-type", default=None)
+    langmem_entity_list_parser.add_argument("--limit", type=int, default=50)
+
+    langmem_entity_search_parser = subparsers.add_parser(
+        "langmem-entity-search", help="Search langmem entities."
+    )
+    langmem_entity_search_parser.add_argument("--query", required=True)
+    langmem_entity_search_parser.add_argument("--limit", type=int, default=10)
+
+    langmem_snapshot_parser = subparsers.add_parser(
+        "langmem-snapshot", help="Get memory snapshot for a session."
+    )
+    langmem_snapshot_parser.add_argument("--session-id", required=True)
+
+    langmem_compress_parser = subparsers.add_parser(
+        "langmem-compress", help="Compress session memory."
+    )
+    langmem_compress_parser.add_argument("--session-id", required=True)
+
+    langmem_sessions_parser = subparsers.add_parser(
+        "langmem-sessions", help="List all langmem sessions."
+    )
+
+    langmem_config_parser = subparsers.add_parser(
+        "langmem-config", help="Show langmem configuration."
+    )
+
     return parser.parse_args()
 
 
@@ -141,6 +203,7 @@ def main() -> None:
     orchestrator_service = MemoryOrchestratorService()
     skill_service = SkillService()
     session_service = SessionSearchService()
+    langmem_service = LangmemService()
 
     if args.command == "memory-add":
         dump(persistent_service.add_entry(args.target, args.content))
@@ -279,6 +342,96 @@ def main() -> None:
             )
             return
         raise SystemExit(f"Unsupported suggestion kind: {args.kind}")
+
+    # Langmem CLI commands
+    if args.command == "langmem-msg-add":
+        metadata = json.loads(args.metadata) if args.metadata else {}
+        async def _add_msg():
+            await langmem_service.initialize()
+            msg = await langmem_service.add_message(
+                args.session_id, args.role, args.content, metadata
+            )
+            dump(msg.to_dict())
+        asyncio.run(_add_msg())
+        return
+
+    if args.command == "langmem-msg-list":
+        async def _list_msgs():
+            await langmem_service.initialize()
+            messages = await langmem_service.list_messages(args.session_id, args.limit)
+            dump([msg.to_dict() for msg in messages])
+        asyncio.run(_list_msgs())
+        return
+
+    if args.command == "langmem-msg-search":
+        async def _search_msgs():
+            await langmem_service.initialize()
+            messages, summary = await langmem_service.search_messages(
+                args.session_id, args.query, args.limit
+            )
+            dump({
+                "session_id": args.session_id,
+                "query": args.query,
+                "summary": summary,
+                "items": [msg.to_dict() for msg in messages],
+            })
+        asyncio.run(_search_msgs())
+        return
+
+    if args.command == "langmem-entity-add":
+        metadata = json.loads(args.metadata) if args.metadata else {}
+        async def _add_entity():
+            await langmem_service.initialize()
+            entity = await langmem_service.add_entity(
+                args.entity_name, args.entity_type, args.description, metadata
+            )
+            dump(entity.to_dict())
+        asyncio.run(_add_entity())
+        return
+
+    if args.command == "langmem-entity-list":
+        async def _list_entities():
+            await langmem_service.initialize()
+            entities = await langmem_service.list_entities(args.entity_type, args.limit)
+            dump([entity.to_dict() for entity in entities])
+        asyncio.run(_list_entities())
+        return
+
+    if args.command == "langmem-entity-search":
+        async def _search_entities():
+            await langmem_service.initialize()
+            entities = await langmem_service.search_entities(args.query, args.limit)
+            dump([entity.to_dict() for entity in entities])
+        asyncio.run(_search_entities())
+        return
+
+    if args.command == "langmem-snapshot":
+        async def _get_snapshot():
+            await langmem_service.initialize()
+            snapshot = await langmem_service.get_memory_snapshot(args.session_id)
+            dump(snapshot.to_dict())
+        asyncio.run(_get_snapshot())
+        return
+
+    if args.command == "langmem-compress":
+        async def _compress():
+            await langmem_service.initialize()
+            result = await langmem_service.compress_memory(args.session_id)
+            dump(result)
+        asyncio.run(_compress())
+        return
+
+    if args.command == "langmem-sessions":
+        async def _list_sessions():
+            await langmem_service.initialize()
+            sessions = await langmem_service.list_sessions()
+            dump(sessions)
+        asyncio.run(_list_sessions())
+        return
+
+    if args.command == "langmem-config":
+        dump(langmem_service.config)
+        return
 
     raise SystemExit(f"Unknown command: {args.command}")
 

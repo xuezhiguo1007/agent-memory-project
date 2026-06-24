@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: langmem_postgres
+    environment:
+      POSTGRES_DB: langmem_db
+      POSTGRES_USER: langmem_user
+      POSTGRES_PASSWORD: langmem_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - langmem_pg_data:/var/lib/postgresql/data
+      - ./scripts/init_postgres_docker.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langmem_user -d langmem_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  langmem_pg_data:
+    driver: local

@@ -161,3 +161,96 @@ class MaterializeSuggestionReq(BaseModel):
 class MaterializeSuggestionResult(BaseModel):
     destination: str
     payload: dict[str, Any] = Field(default_factory=dict)
+
+
+# ==================== Langmem Schemas ====================
+
+
+class LangmemMessageCreateReq(BaseModel):
+    session_id: str
+    role: str = Field(default="user")
+    content: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class LangmemMessageItem(BaseModel):
+    message_id: int
+    session_id: str
+    role: str
+    content: str
+    created_at: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    score: float | None = None
+
+
+class LangmemEntityCreateReq(BaseModel):
+    entity_name: str
+    entity_type: str
+    description: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class LangmemEntityItem(BaseModel):
+    entity_id: int
+    entity_name: str
+    entity_type: str
+    description: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: str
+    updated_at: str
+    occurrences: int
+
+
+class LangmemSearchReq(BaseModel):
+    query: str
+    limit: int = Field(default=10, ge=1, le=50)
+
+
+class LangmemSearchResult(BaseModel):
+    session_id: str
+    query: str
+    total: int
+    summary: str
+    items: list[LangmemMessageItem] = Field(default_factory=list)
+
+
+class LangmemMemorySnapshot(BaseModel):
+    session_id: str
+    messages: list[LangmemMessageItem] = Field(default_factory=list)
+    entities: list[LangmemEntityItem] = Field(default_factory=list)
+    summary: str
+    token_count: int
+
+
+class LangmemCompressResult(BaseModel):
+    session_id: str
+    compressed: bool
+    original_count: int | None = None
+    remaining_count: int | None = None
+    summary: str | None = None
+    message_count: int | None = None
+    reason: str | None = None
+
+
+class LangmemSessionInfo(BaseModel):
+    session_id: str
+    message_count: int
+    first_message: str
+    last_message: str
+
+
+class LangmemConfigUpdateReq(BaseModel):
+    max_messages_per_session: int | None = None
+    max_tokens_per_snapshot: int | None = None
+    entity_extraction_enabled: bool | None = None
+    auto_compression_enabled: bool | None = None
+    compression_threshold: int | None = None
+
+
+class LangmemConfig(BaseModel):
+    max_messages_per_session: int
+    max_tokens_per_snapshot: int
+    entity_extraction_enabled: bool
+    auto_compression_enabled: bool
+    compression_threshold: int
+    supported_entity_types: list[str] = Field(default_factory=list)
